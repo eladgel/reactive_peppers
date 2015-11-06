@@ -1,0 +1,17 @@
+{
+  "name": "AwesomeProject3",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "react-native start"
+  },
+  "dependencies": {
+    "react-native": "^0.14.0",
+    "parse": "*",
+    "parse-react": "*",
+    "react-native-device-info": "gpbl/react-native-device-info",
+    "react-native-icons": "^0.6.1",
+    "react-native-store": "0.0.9",
+    "uuid": "^2.0.1"
+  }
+}
