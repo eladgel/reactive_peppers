@@ -39,7 +39,41 @@ var AwesomeProject3 = React.createClass({
     return { checked: false };
   },
 
+  observe: function(props, state) {
+    return { 
+      user: ParseReact.currentUser,
+    };
+// undefined - still pending user status
+// null - no user
+// Parse.User - user exists
+  },
+
   render: function() {
+
+    if (this.data.user === undefined) {
+      console.log('User status still in progress...');
+      // Still waiting
+    } else if (this.data.user === null) {
+      var newUser = new Parse.User();
+      newUser.set('username', uuid.v4());
+      newUser.set('password', uuid.v4());
+      newUser.signUp(null, {
+        success: function(user) {
+          // Hooray! Let them use the app now.
+          console.log('WE HAVE A NEW USER!!', user)
+        },
+        error: function(user, error) {
+          // Show the error message somewhere and let the user try again.
+          console.log("Error in signup: ", error.code, ' ', error.message);
+        }
+
+      });
+      // Show log in screen
+    } else {
+      console.log('User is already logged in');
+      // Show the app
+    }
+
     return (
       <View style={styles.container}>
         <LocationsListView />

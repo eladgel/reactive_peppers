@@ -69,8 +69,8 @@ var LocationsListView = React.createClass({
 
   render: function() {
   	// var currentUserPromise = Parse.User.currentAsync();
-  	console.log('ParseReact is: ', ParseReact);
-  	console.log('ParseReact.currentUser is: ', ParseReact.currentUser);
+  	// console.log('ParseReact is: ', ParseReact);
+  	// console.log('ParseReact.currentUser is: ', ParseReact.currentUser);
   	// currentUserPromise.then(function(user) {
   		// console.log('user in render is: ', this.data.user);
   	// });
