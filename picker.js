@@ -43,21 +43,27 @@ Parse.initialize(
   PARSE_JS_KEY
 );
 
+// var User = Parse.Object.extend("User");
+// var _User = Parse.Object.extend("_User");
+
 var LocationsListView = React.createClass({
 	mixins: [ParseReact.Mixin],
   getInitialState: function() {
     var locationsDataSource = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     return {
       locationsDataSource: locationsDataSource,//ds.cloneWithRows(this._genRows({})),
+      userLocations: undefined,
     };
   },
 
 	observe: function(props, state) {
-	  var locationsQuery = (new Parse.Query('Location')).ascending('city');
+	  var locationsQuery = Parse.User.current().relation('channels').query();//(new Parse.Query('Location')).ascending('city');
+    var userQuery = (new Parse.Query('_User')).include('locations').equalTo('objectId', Parse.User.currentAsync().id)
 	  // var locationsQuery = (new Parse.Query('User')).ascending('city');
 	  return { 
 	  	locations: locationsQuery,
-	  	user: ParseReact.currentUser,
+	  	localUser: ParseReact.currentUser,
+      user: userQuery
 	  };
 	},
 
@@ -68,15 +74,71 @@ var LocationsListView = React.createClass({
   },
 
   render: function() {
+    if (this.data.localUser === undefined) {
+      return (
+          <Text>Loading...</Text>
+        );
+      // Still waiting
+    } else if (this.data.localUser === null) {
+      // Show log in screen
+      return (
+          <Text>Loading...</Text>
+        );
+    } else {
+      if (this.state.userLocations === undefined) {
+        var that = this;
+        var currentUser = Parse.User.current();
+        // console.log('currentUser is ', currentUser);
+
+        var q = new Parse.Query('User');
+        q.equalTo('objectId', currentUser.id);
+        q.find().then(function(user) {
+          if (user.length > 0) {
+            user = user[0];
+          } else {
+            return;
+          }
+          // console.log('searched for user and found: ', user);
+
+          var relation = user.relation('locations');
+          // console.log('found user` locations relation: ', relation);
+
+          return relation.query().find();
+        }, function() {console.log('error: ', arguments);}).then(function(locations) {
+
+          that.setState({userLocations: locations})
+          // console.log('user` locations: ', locations);
+        });
+
+        var relation = new Parse.Relation(currentUser, 'locations');//currentUser.relation('locations');
+        relation.query().find({
+          success: function(results) {
+            console.log('results from relation: ', results);
+            this.setState({userLocations: results});
+          }.bind(this),
+          error: function() {
+            console.log('blach; ', arguments[0]);
+          }
+        });
+        return (
+          <Text>Loading...</Text>
+        );
+      } else {
+
+      }
+      // Show the app
+    }
   	// var currentUserPromise = Parse.User.currentAsync();
   	// console.log('ParseReact is: ', ParseReact);
   	// console.log('ParseReact.currentUser is: ', ParseReact.currentUser);
   	// currentUserPromise.then(function(user) {
-  		// console.log('user in render is: ', this.data.user);
+  		// console.log('user in render is: ', this.data.localUser);
   	// });
+// console.log('locations is ', this.data.locations);
+    // var flattenedLocations = this.data.locations.forEach(function(location) {console.log('flattening location, location is - ', location);});// location.toPlainObject()});
     return (
         <ListView
-          dataSource={this.state.locationsDataSource.cloneWithRows(this._genRows({}))}
+          dataSource={this.state.locationsDataSource.cloneWithRows(this.data.locations)}
           renderRow={this._renderRow}
           scrollEnabled={true}
           contentContainerStyle={styles.list}
@@ -86,20 +148,22 @@ var LocationsListView = React.createClass({
   },
 
 /* @flow */
-  _renderRow: function(rowData: Object, sectionID: number, rowID: number) {
+  _renderRow: function(rowData: Parse.Object, sectionID: number, rowID: number) {
+// console.log('renderRow - rowID is ', rowID);
+// console.log('renderRow - rowData.objectId is ', rowData.objectId);
     var rowHash = Math.abs(hashCode(rowData));
     var imgSource = {
       uri: THUMB_URLS[rowHash % THUMB_URLS.length],
     };
     // {/*rowData.selected ? '#aaaaff' : '#dddddd'*/}
     return (
-      <TouchableHighlight onPress={() => this._pressRow(rowID)}>
+      <TouchableHighlight onPress={() => this._pressRow(rowData.objectId)}>
         <View>
           <View style={styles.row}>
             <Icon 
             	name="fontawesome|check"
             	size={30}
-            	color={rowData.selected ? '#5555ff' : '#dddddd'}
+            	color={(this.state.userLocations.indexOf(rowData) !== -1) ? '#5555ff' : '#dddddd'}
             	style={styles.checkIcon}
             	/>
             {/*<Image style={styles.thumb} source={imgSource} />*/}
@@ -113,24 +177,46 @@ var LocationsListView = React.createClass({
     );
   },
 
-  _genRows: function(pressData: {[key: number]: boolean}): Array<Object> {
-  	// console.log(this.data.locations);
-  	return this.data.locations;
-    var dataBlob = [];
-    for (var ii = 0; ii < 100; ii++) {
-    	var isSelected = pressData[ii] ? true : false;
-      var pressedText = pressData[ii] ? ' (pressed)' : '';
-      var rowData = {title: 'Row ' + ii, selected: isSelected};
-      dataBlob.push(rowData);
-    }
-    return dataBlob;
-  },
+  // _genRows: function(pressData: {[key: number]: boolean}): Array<Object> {
+  // 	// console.log(this.data.locations);
+  // 	return this.data.locations;
+  //   var dataBlob = [];
+  //   for (var ii = 0; ii < 100; ii++) {
+  //   	var isSelected = pressData[ii] ? true : false;
+  //     var pressedText = pressData[ii] ? ' (pressed)' : '';
+  //     var rowData = {title: 'Row ' + ii, selected: isSelected};
+  //     dataBlob.push(rowData);
+  //   }
+  //   return dataBlob;
+  // },
 
-  _pressRow: function(rowID: number) {
-    this._pressData[rowID] = !this._pressData[rowID];
-    this.setState({locationsDataSource: this.state.locationsDataSource.cloneWithRows(
-      this._genRows(this._pressData)
-    )});
+  _pressRow: function(locationID: string) {
+    // this._pressData[rowID] = !this._pressData[rowID];
+console.log('Parse.User.current() is ', Parse.User.current());
+console.log('Parse.User.current().relation is ', Parse.User.current().relation);
+console.log('Parse.User.current().relation("locations") is ', Parse.User.current().relation('locations'));
+var location = new Parse.Object.extend('Location');
+location.id = locationID;
+var relation = Parse.User.current().relation('locations');
+var filteredLocations = this.state.userLocations.filter(function(filteredLocation) {
+  return (filteredLocation.id == locationID)
+});
+if (filteredLocations.length > 0) {
+  relation.remove(location);
+} else {
+  relation.add(location)  
+}
+Parse.User.current().save();
+debugger;
+return;
+    var userLocations = this.data.localUser.relation('locations');
+    console.log('user relations: ', userLocations);
+    // userLocations.
+    // this.setState({chosenLocations: })
+
+    // this.setState({locationsDataSource: this.state.locationsDataSource.cloneWithRows(
+      // this._genRows(this._pressData)
+    // )});
   },
 });
 

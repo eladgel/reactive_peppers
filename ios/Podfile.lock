@@ -1,29 +1,29 @@
 PODS:
-  - Bolts/Tasks (1.4.0)
-  - Parse (1.9.1):
-    - Bolts/Tasks (>= 1.4.0)
+  - Bolts/Tasks (1.5.0)
+  - Parse (1.10.0):
+    - Bolts/Tasks (~> 1.5)
   - react-native-icons (0.0.4)
-  - React/Core (0.14.0)
-  - React/RCTActionSheet (0.14.0):
+  - React/Core (0.14.2)
+  - React/RCTActionSheet (0.14.2):
     - React/Core
-  - React/RCTGeolocation (0.14.0):
+  - React/RCTGeolocation (0.14.2):
     - React/Core
-  - React/RCTImage (0.14.0):
+  - React/RCTImage (0.14.2):
     - React/Core
     - React/RCTNetwork
-  - React/RCTLinkingIOS (0.14.0):
+  - React/RCTLinkingIOS (0.14.2):
     - React/Core
-  - React/RCTNetwork (0.14.0):
+  - React/RCTNetwork (0.14.2):
     - React/Core
-  - React/RCTPushNotification (0.14.0):
+  - React/RCTPushNotification (0.14.2):
     - React/Core
-  - React/RCTSettings (0.14.0):
+  - React/RCTSettings (0.14.2):
     - React/Core
-  - React/RCTText (0.14.0):
+  - React/RCTText (0.14.2):
     - React/Core
-  - React/RCTVibration (0.14.0):
+  - React/RCTVibration (0.14.2):
     - React/Core
-  - React/RCTWebSocket (0.14.0):
+  - React/RCTWebSocket (0.14.2):
     - React/Core
 
 DEPENDENCIES:
@@ -47,9 +47,9 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-icons"
 
 SPEC CHECKSUMS:
-  Bolts: 0e9bce58b9b9f5e8a7a4d47b16d2fabec289072b
-  Parse: 54a965c8c19a6dde90284ab654dbcc77ef8c001b
-  React: b24bfe50582ed11f4c63dbc9e31518e56d6bb8e8
+  Bolts: 722ab9a4f8b50fc4ed1b9998a5a7a2b3f16d80b4
+  Parse: 90b2544822200f84b18bfacc4e8b0a3a6c3584a2
+  React: e0dc1498eee8800999917f437a027223f49d731d
   react-native-icons: 1c80e8ebde9d4b8450631c87ad0bc99eb95eceda
 
 COCOAPODS: 0.39.0
